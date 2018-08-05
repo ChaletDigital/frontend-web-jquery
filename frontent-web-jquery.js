@@ -4,7 +4,7 @@ var url_global= "http://geninhofloripa.ddns.net:82";
 
 $.support.cors = true;
 
-// FUNCAO  UM  - MONTA
+// FUNCTION ONE: Receive the XML from Arduino and builds UI based on the XML
 function setupComponentsOnUI() {
 
   $.ajax({
@@ -113,12 +113,8 @@ function sendToArduino(pin, value) {
   });
 }
 
-
-
-
-
-// FUNCAO  T R E S -   CHECA ESTADO
-function checaEstado() {
+// FUNCTION 3: Receives a new XML from Arduino and updates the UI if needed
+function checkArduinoState() {
 
   $.ajax({
     type: "GET",
@@ -129,59 +125,41 @@ function checaEstado() {
     dataType: "xml",
 
     success: function(xml) {
+
+      //TODO: Remove all duplicated code between Funtions 2 and 3
+      $("#div_botao_" + pin + " .img_loading").hide();
+
       $(xml).find('Pin').each(function(index){
-        var digitalPin = $(this).find('digitalPin').text();
-        var statusPin = $(this).find('Estado').text();
-        var namePin = $(this).find('namePin').text();
-        //var tipoPin= $(this).find('Tipo').text();
+        const digitalPin = $(this).find('digitalPin').text();
+        const statusPin = $(this).find('Estado').text();
+        const pulse = $(this).find('pulso').text();
 
-        if (namePin=="") namePin= digitalPin;
+        let namePin = $(this).find('namePin').text();
+        if (namePin == '') namePin = digitalPin;
 
-        var status_atual= $("#botao_"+digitalPin).attr("data-status");
+        const currentStatus= $("#botao_" + digitalPin).attr("data-status");
+        // If the pin value we received is different from our current UI, we need to update the UI
+        if (currentStatus != statusPin) {
+          const command = (statusPin == '1') ? 'OFF' : 'ON';
+          const verb = (statusPin == '1') ? 'ON' : 'OFF';
+          const addClass = (statusPin == '1') ? 'ligado' : 'desligado';
+          const removeClass = (statusPin == '1') ? 'desligado' : 'ligado';
 
-        //se o estado do botão em questão for diferente do que foi servido, anima e troca...
-
-        if (status_atual!=statusPin) {
-
-          var comando, verbo, classe_retirar, classe_adicionar;
-
-          if (statusPin=="1") {
-            comando="OFF";
-            verbo= "ON";
-            classe_adicionar= "ligado";
-            classe_retirar= "desligado";
-          }
-          else {
-            comando="ON";
-            verbo= "OFF";
-            classe_adicionar= "desligado";
-            classe_retirar= "ligado";
-          }
-
-          $("#botao_"+digitalPin).attr("data-comando", comando);
+          $("#botao_"+digitalPin).attr("data-comando", command);
           $("#botao_"+digitalPin).attr("data-status", statusPin);
-
-          //if (tipoPin!="2") {
           $("#botao_"+digitalPin).html(namePin);
-
-          $("#botao_"+digitalPin).removeClass(classe_retirar);
-          //}
-
-          $("#botao_"+digitalPin).addClass(classe_adicionar);
-
-          $("#botao_"+digitalPin).css("background-image", "url(images/"+digitalPin+"_"+verbo+".jpg)");
+          $("#botao_"+digitalPin).removeClass(removeClass);
+          $("#botao_"+digitalPin).addClass(addClass);
+          $("#botao_"+digitalPin).css("background-image", "url(images/" + digitalPin + "_" + verb + ".jpg)");
         }
       });
-
-
     },
     error: function() {
-      alert("The XML File could not be processed correctly. E agora?");
+      alert("The XML file could not be processed correctly.");
     }
-
   });
-
 }
+
 
 
 
@@ -193,8 +171,8 @@ $(document).ready(function() {
   setupComponentsOnUI();
 
   setInterval(function() {
-    checaEstado();
-  }, 15000);
+    checkArduinoState();
+  }, 3000);
 
 
   $(document).on('click', '.botao', function() {
