@@ -160,12 +160,7 @@ function checkArduinoState() {
   });
 }
 
-
-
-
-
-
-// FUNCAO   Q U A T R O   -     M A G I C A
+// FUNCION 4: Main
 $(document).ready(function() {
 
   setupComponentsOnUI();
@@ -174,31 +169,18 @@ $(document).ready(function() {
     checkArduinoState();
   }, 3000);
 
-
   $(document).on('click', '.botao', function() {
 
-    var pino=              $(this).attr("data-pino");
-    var nome=              $(this).attr("data-nome");
-    var comando=           $(this).attr("data-comando");
-    var requerConfirmacao= $(this).attr("data-requerconfirmacao");
-    var passa= 0;
+    const pin = $(this).attr("data-pino");
+    const name = $(this).attr("data-nome");
 
+    const command = $(this).attr("data-comando");
+    const requiresConfirmation = $(this).attr("data-requerconfirmacao");
+    const needsUserConfirmation = (requiresConfirmation == '1') && (command == 'ON')
 
-    if ((requerConfirmacao=="1") && (comando=="ON")) {
-
-      passa= confirm("Tem realmente certeza absoluta que realmente fazer isto?");
-    }
-    else {
-
-      passa=1;
-    }
-
-
-    if (passa) {
-
-      sendToArduino(pino, comando);
-    }
-
+    let commandIsAuthorized = true;
+    if (needsUserConfirmation) commandIsAuthorized = confirm("Tem realmente certeza absoluta que realmente fazer isto?");
+    if (commandIsAuthorized) sendToArduino(pino, comando);
   });
 
 });
