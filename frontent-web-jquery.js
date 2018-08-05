@@ -57,14 +57,10 @@ function setupComponentsOnUI() {
 }
 
 
+// FUNCTION TWO: Send a GET request to Arduino with a new value for a pin and updates UI
+function sendToArduino(pin, value) {
 
-
-
-// FUNCAO  D O I S  -
-function envia(pino, valor) {
-  //console.log(pino+ " - " +valor);
-
-  $("#div_botao_"+pino+" .img_loading").css("display", "block");
+  $("#div_botao_" + pin + " .img_loading").css("display", "block");
 
   $.ajax({
     type: "GET",
@@ -74,63 +70,46 @@ function envia(pino, valor) {
     dataType: "xml",
     url: url_global,
 
-    // valor a ser enviado ao Arduino para ligar ou desligar algo, de acordo com os parâmetros
-    data: 'PIN'+pino+'='+valor,
+    //Value to be sent to Arduino on the GET request, according to parameters given
+    data: 'PIN' + pin + '=' + value,
 
     success: function(xml) {
-      $("#div_botao_"+pino+" .img_loading").hide();
+      $("#div_botao_" + pin + " .img_loading").hide();
 
       $(xml).find('Pin').each(function(index){
-        var digitalPin =          $(this).find('digitalPin').text();
-        var statusPin =           $(this).find('Estado').text();
-        var namePin =             $(this).find('namePin').text();
-        var pulso =               $(this).find('pulso').text();
+        const digitalPin = $(this).find('digitalPin').text();
+        const statusPin = $(this).find('Estado').text();
+        const pulse = $(this).find('pulso').text();
 
-        if (namePin=="") namePin= digitalPin;
+        let namePin = $(this).find('namePin').text();
+        if (namePin == '') namePin = digitalPin;
 
-        var status_atual= $("#botao_"+digitalPin).attr("data-status");
+        const currentStatus= $("#botao_" + digitalPin).attr("data-status");
+        // If the pin value we received is different from our current UI, we need to update the UI
+        if (currentStatus != statusPin) {
+          const command = (statusPin == '1') ? 'OFF' : 'ON';
+          const verb = (statusPin == '1') ? 'ON' : 'OFF';
+          const addClass = (statusPin == '1') ? 'ligado' : 'desligado';
+          const removeClass = (statusPin == '1') ? 'desligado' : 'ligado';
 
-        // se o estado do botão em questão for diferente do que foi servido, anima e troca...
-        if (status_atual!=statusPin) {
-          var comando, verbo, classe_retirar, classe_adicionar;
-
-          if (statusPin=="1") {
-            comando="OFF";
-            verbo= "ON";
-            classe_adicionar= "ligado";
-            classe_retirar= "desligado";
-          }
-          else {
-            comando="ON";
-            verbo= "OFF";
-            classe_adicionar= "desligado";
-            classe_retirar= "ligado";
-          }
-          $("#botao_"+digitalPin).attr("data-comando", comando);
+          $("#botao_"+digitalPin).attr("data-comando", command);
           $("#botao_"+digitalPin).attr("data-status", statusPin);
           $("#botao_"+digitalPin).html(namePin);
-          $("#botao_"+digitalPin).removeClass(classe_retirar);
-          $("#botao_"+digitalPin).addClass(classe_adicionar);
-          $("#botao_"+digitalPin).css("background-image", "url(images/"+digitalPin+"_"+verbo+".jpg)");
-
-
+          $("#botao_"+digitalPin).removeClass(removeClass);
+          $("#botao_"+digitalPin).addClass(addClass);
+          $("#botao_"+digitalPin).css("background-image", "url(images/" + digitalPin + "_" + verb + ".jpg)");
         }
-        //se for igual quer dizer que outro app ligou ou desligou, então não precisa fazer nada
+        // If it's the same (it means other app has updated it), then UI doesn't need to be changed
         else {
-          if ((pulso=="1") && (digitalPin==pino)) {
-            $("#botao_"+digitalPin).attr("class", "ligado");
-
+          if ((pulse == '1') && (digitalPin == pin)) {
+            $("#botao_" + digitalPin).attr("class", "ligado");
             setTimeout(function() {
-              $("#botao_"+digitalPin).attr("class", "desligado");
+              $("#botao_" + digitalPin).attr("class", "desligado");
             }, 250);
-
           }
-
         }
-
       });
     }
-
   });
 }
 
@@ -239,7 +218,7 @@ $(document).ready(function() {
 
     if (passa) {
 
-      envia(pino, comando);
+      sendToArduino(pino, comando);
     }
 
   });
