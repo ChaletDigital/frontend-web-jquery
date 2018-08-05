@@ -84,12 +84,11 @@ function sendToArduino(pin, value) {
         const statusPin = $(this).find('Estado').text();
         const currentStatus= $("#botao_" + digitalPin).attr("data-status");
 
-        // If the pin value we received is different from our current UI, we need to update the UI
         if (currentStatus != statusPin) {
-          updateUI()
-        }
-        // If it's the same (it means other app has updated it), then UI doesn't need to be changed
-        else {
+          // If the pin value we received is different from our current UI, we need to update the UI
+          updateUI.call(this)
+        } else {
+          // If it's the same (it means other app has updated it), then UI doesn't need to be changed
           const digitalPin = $(this).find('digitalPin').text();
           const pulse = $(this).find('pulso').text();
 
@@ -144,7 +143,7 @@ function checkArduinoState() {
         const statusPin = $(this).find('Estado').text();
         const currentStatus= $("#botao_" + digitalPin).attr("data-status");
 
-        if (currentStatus != statusPin) updateUI()
+        if (currentStatus != statusPin) updateUI.call(this)
       });
     },
     error: function() {
