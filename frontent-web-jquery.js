@@ -1,8 +1,11 @@
-//Configure aqui o endereço e a porta do Arduino
-//var url_global= "http://geninho.homeip.net:88";
+//Setup address and port of Arduino
 var url_global= "http://geninhofloripa.ddns.net:82";
-
 $.support.cors = true;
+
+const replies = {
+    'XML_ISSUE' :'The XML file could not be processed correctly.',
+    'CONFIRMATION' :'Tem realmente certeza absoluta que deseja fazer isto?',
+};
 
 // FUNCTION ONE: Receive the XML from Arduino and builds UI based on the XML
 function setupComponentsOnUI() {
@@ -51,7 +54,7 @@ function setupComponentsOnUI() {
       });
     },
     error: function() {
-      alert("The XML file could not be processed correctly.");
+      alert(message['XML_ISSUE']);
     }
   });
 }
@@ -155,7 +158,7 @@ function checkArduinoState() {
       });
     },
     error: function() {
-      alert("The XML file could not be processed correctly.");
+      alert(message['XML_ISSUE']);
     }
   });
 }
@@ -179,8 +182,7 @@ $(document).ready(function() {
     const needsUserConfirmation = (requiresConfirmation == '1') && (command == 'ON')
 
     let commandIsAuthorized = true;
-    if (needsUserConfirmation) commandIsAuthorized = confirm("Tem realmente certeza absoluta que realmente fazer isto?");
+    if (needsUserConfirmation) commandIsAuthorized = confirm(message['CONFIRMATION']);
     if (commandIsAuthorized) sendToArduino(pino, comando);
   });
-
 });
