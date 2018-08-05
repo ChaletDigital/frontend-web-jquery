@@ -5,71 +5,86 @@ var url_global= "http://192.168.25.36:82";
 $.support.cors = true;
 
 
-// FUNCAO  UM  - MONTA
-function setupComponentsOnUI() {
+// FUNCAO  U M  - MONTA
+function monta() {
 
-  $.ajax({
-    type: "GET",
-    crossDomain: true,
-    url: url_global,
-    async : true,
-    contentType: "text/xml",
-    dataType: "xml",
+	 $.ajax({
+		  type: "GET",
 
-    success: function(xml) {
+		  crossDomain: true,
 
-      $("#loading").remove();
+		  url: url_global,
 
-      $(xml).find('Pin').each(function(index){
+		  async : true,
 
-        var comando, verbo, classe_botao, larguraBotao;
-        var digitalPin = $(this).find('digitalPin').text();
-        var statusPin = $(this).find('Estado').text();
-        var namePin = $(this).find('namePin').text();
-        var requerConfirmacao = $(this).find('requerConfirmacao').text();
-        var dimerizavel = $(this).find('dimerizavel').text();
-        var pulso = $(this).find('pulso').text();
+		  contentType: "text/xml",
 
-        if (namePin=="") namePin= digitalPin;
+		  dataType: "xml",
 
-        //TODO: Change by ternary condition
-        if (statusPin=="1") {
-          comando="OFF";
-          verbo= "ON";
-          classe_botao= "ligado";
-        }
-        else {
-          comando="ON";
-          verbo= "OFF";
-          classe_botao= "desligado";
-        }
+		  success: function(xml) {
 
-        //TODO: Change by ternary condition
-        if (dimerizavel=="1") larguraBotao=3;
-        else larguraBotao=6;
+	              $("#loading").remove();
 
-        $('.row').append('<div class="bloco\
-        col-lg-' +larguraBotao+' col-sm-' +larguraBotao+' \
-        col-md-' +larguraBotao+' col-xs-' +larguraBotao+'" \
-        id="div_botao_' +digitalPin+' ">\
-        <button style="background-image:url(images/' +digitalPin+ '_'+verbo+'.jpg);"\
-        id="botao_'+digitalPin+'" class="btn btn-large btn-primary botao '+classe_botao+'" \
-        data-status="' +statusPin+ '" data-nome="' +namePin+' " \
-        data-requerconfirmacao="' +requerConfirmacao+ '" \
-        data-dimerizavel="' +dimerizavel+ '" \
-        data-pulso="' +pulso+ '" \
-        data-comando="' +comando+ '" \
-        data-pino="' +digitalPin+ '">' +namePin+ '\
-        </button>\
-        </div>');
+		      $(xml).find('Pin').each(function(index){
 
-      });
-    },
+		            var digitalPin = $(this).find('digitalPin').text();
+		            var statusPin = $(this).find('Estado').text();
+		            var namePin = $(this).find('namePin').text();
+		            var requerConfirmacao = $(this).find('requerConfirmacao').text();
+		            var dimerizavel = $(this).find('dimerizavel').text();
+		            var pulso = $(this).find('pulso').text();
 
-    error: function() {
-      alert("The XML File could not be processed correctly.");
-    }
-  });
+		            if (namePin=="") namePin= digitalPin;
+
+
+		            var comando, verbo, classe_botao;
+		            if (statusPin=="1") {
+
+			            comando="OFF";
+			            verbo= "ON";
+			            classe_botao= "ligado";
+			    }
+		            else {
+
+			            comando="ON";
+			            verbo= "OFF";
+			            classe_botao= "desligado";
+			    }
+
+		            var larguraBotao;
+		            if (dimerizavel=="1") larguraBotao=3;
+		            else larguraBotao=6;
+
+
+		            $('.row').append('<div class="bloco\
+		                                  col-lg-' +larguraBotao+' col-sm-' +larguraBotao+' \
+					          col-md-' +larguraBotao+' col-xs-' +larguraBotao+'" \
+					          id="div_botao_' +digitalPin+' ">\
+			       	                <button style="background-image:url(images/' +digitalPin+ '_'+verbo+'.jpg);"\
+					           id="botao_'+digitalPin+'" class="btn btn-large btn-primary botao '+classe_botao+'" \
+					           data-status="' +statusPin+ '" data-nome="' +namePin+' " \
+					           data-requerconfirmacao="' +requerConfirmacao+ '" \
+					           data-dimerizavel="' +dimerizavel+ '" \
+					           data-pulso="' +pulso+ '" \
+					           data-comando="' +comando+ '" \
+					           data-pino="' +digitalPin+ '">' +namePin+ '\
+					        </button>\
+					      </div>');
+
+	              });
+
+
+		  },
+
+		  error: function() {
+
+		     alert("The XML File could not be processed correctly.");
+
+	          }
+
+
+     });
+
 }
 
 
@@ -78,76 +93,76 @@ function setupComponentsOnUI() {
 
 // FUNCAO  D O I S  -
 function envia(pino, valor) {
-  //console.log(pino+ " - " +valor);
+    //console.log(pino+ " - " +valor);
 
-  $("#div_botao_"+pino+" .img_loading").css("display", "block");
+    $("#div_botao_"+pino+" .img_loading").css("display", "block");
 
-  $.ajax({
-    type: "GET",
-    crossDomain: true,
-    async : true,
-    contentType: "text/xml",
-    dataType: "xml",
-    url: url_global,
+    $.ajax({
+        type: "GET",
+	crossDomain: true,
+	async : true,
+	contentType: "text/xml",
+	dataType: "xml",
+	url: url_global,
 
-    // valor a ser enviado ao Arduino para ligar ou desligar algo, de acordo com os parâmetros
-    data: 'PIN'+pino+'='+valor,
+	// valor a ser enviado ao Arduino para ligar ou desligar algo, de acordo com os parâmetros
+	data: 'PIN'+pino+'='+valor,
 
-    success: function(xml) {
-      $("#div_botao_"+pino+" .img_loading").hide();
+	success: function(xml) {
+            $("#div_botao_"+pino+" .img_loading").hide();
 
-      $(xml).find('Pin').each(function(index){
-        var digitalPin =          $(this).find('digitalPin').text();
-        var statusPin =           $(this).find('Estado').text();
-        var namePin =             $(this).find('namePin').text();
-        var pulso =               $(this).find('pulso').text();
+            $(xml).find('Pin').each(function(index){
+	        var digitalPin =          $(this).find('digitalPin').text();
+	        var statusPin =           $(this).find('Estado').text();
+	        var namePin =             $(this).find('namePin').text();
+	        var pulso =               $(this).find('pulso').text();
 
-        if (namePin=="") namePin= digitalPin;
+	        if (namePin=="") namePin= digitalPin;
 
-        var status_atual= $("#botao_"+digitalPin).attr("data-status");
+	        var status_atual= $("#botao_"+digitalPin).attr("data-status");
 
-        // se o estado do botão em questão for diferente do que foi servido, anima e troca...
-        if (status_atual!=statusPin) {
-          var comando, verbo, classe_retirar, classe_adicionar;
+		// se o estado do botão em questão for diferente do que foi servido, anima e troca...
+		if (status_atual!=statusPin) {
+                    var comando, verbo, classe_retirar, classe_adicionar;
 
-          if (statusPin=="1") {
-            comando="OFF";
-            verbo= "ON";
-            classe_adicionar= "ligado";
-            classe_retirar= "desligado";
-          }
-          else {
-            comando="ON";
-            verbo= "OFF";
-            classe_adicionar= "desligado";
-            classe_retirar= "ligado";
-          }
-          $("#botao_"+digitalPin).attr("data-comando", comando);
-          $("#botao_"+digitalPin).attr("data-status", statusPin);
-          $("#botao_"+digitalPin).html(namePin);
-          $("#botao_"+digitalPin).removeClass(classe_retirar);
-          $("#botao_"+digitalPin).addClass(classe_adicionar);
-          $("#botao_"+digitalPin).css("background-image", "url(images/"+digitalPin+"_"+verbo+".jpg)");
+		    if (statusPin=="1") {
+                        comando="OFF";
+			verbo= "ON";
+			classe_adicionar= "ligado";
+			classe_retirar= "desligado";
+                    }
+		    else {
+	                comando="ON";
+	                verbo= "OFF";
+	                classe_adicionar= "desligado";
+	                classe_retirar= "ligado";
+                    }
+		    $("#botao_"+digitalPin).attr("data-comando", comando);
+		    $("#botao_"+digitalPin).attr("data-status", statusPin);
+		    $("#botao_"+digitalPin).html(namePin);
+		    $("#botao_"+digitalPin).removeClass(classe_retirar);
+		    $("#botao_"+digitalPin).addClass(classe_adicionar);
+		    $("#botao_"+digitalPin).css("background-image", "url(images/"+digitalPin+"_"+verbo+".jpg)");
 
 
+		}
+		//se for igual quer dizer que outro app ligou ou desligou, então não precisa fazer nada
+		else {
+		    if ((pulso=="1") && (digitalPin==pino)) {
+		        $("#botao_"+digitalPin).attr("class", "ligado");
+
+                        setTimeout(function() {
+                            $("#botao_"+digitalPin).attr("class", "desligado");
+          	        }, 250);
+
+		    }
+
+                }
+
+            });
         }
-        //se for igual quer dizer que outro app ligou ou desligou, então não precisa fazer nada
-        else {
-          if ((pulso=="1") && (digitalPin==pino)) {
-            $("#botao_"+digitalPin).attr("class", "ligado");
 
-            setTimeout(function() {
-              $("#botao_"+digitalPin).attr("class", "desligado");
-            }, 250);
-
-          }
-
-        }
-
-      });
-    }
-
-  });
+    });
 }
 
 
@@ -155,109 +170,114 @@ function envia(pino, valor) {
 
 
 // FUNCAO  T R E S -   CHECA ESTADO
-function checaEstado() {
+ function checaEstado() {
 
-  $.ajax({
-    type: "GET",
-    crossDomain: true,
-    url: url_global,
-    async : true,
-    contentType: "text/xml",
-    dataType: "xml",
+	 $.ajax({
+	  type: "GET",
+	  crossDomain: true,
+	  url: url_global,
+	  async : true,
+	  contentType: "text/xml",
+	  dataType: "xml",
 
-    success: function(xml) {
-      $(xml).find('Pin').each(function(index){
-        var digitalPin = $(this).find('digitalPin').text();
-        var statusPin = $(this).find('Estado').text();
-        var namePin = $(this).find('namePin').text();
-        //var tipoPin= $(this).find('Tipo').text();
+	  success: function(xml) {
 
-        if (namePin=="") namePin= digitalPin;
+	        $(xml).find('Pin').each(function(index){
 
-        var status_atual= $("#botao_"+digitalPin).attr("data-status");
-
-        //se o estado do botão em questão for diferente do que foi servido, anima e troca...
-
-        if (status_atual!=statusPin) {
-
-          var comando, verbo, classe_retirar, classe_adicionar;
-
-          if (statusPin=="1") {
-            comando="OFF";
-            verbo= "ON";
-            classe_adicionar= "ligado";
-            classe_retirar= "desligado";
-          }
-          else {
-            comando="ON";
-            verbo= "OFF";
-            classe_adicionar= "desligado";
-            classe_retirar= "ligado";
-          }
-
-          $("#botao_"+digitalPin).attr("data-comando", comando);
-          $("#botao_"+digitalPin).attr("data-status", statusPin);
-
-          //if (tipoPin!="2") {
-          $("#botao_"+digitalPin).html(namePin);
-
-          $("#botao_"+digitalPin).removeClass(classe_retirar);
-          //}
-
-          $("#botao_"+digitalPin).addClass(classe_adicionar);
-
-          $("#botao_"+digitalPin).css("background-image", "url(images/"+digitalPin+"_"+verbo+".jpg)");
-        }
-      });
+                    var digitalPin = $(this).find('digitalPin').text();
+                    var statusPin = $(this).find('Estado').text();
+                    var namePin = $(this).find('namePin').text();
+                    //var tipoPin= $(this).find('Tipo').text();
 
 
-    },
-    error: function() {
-      alert("The XML File could not be processed correctly. E agora?");
-    }
+                    if (namePin=="") namePin= digitalPin;
 
-  });
+                    var status_atual= $("#botao_"+digitalPin).attr("data-status");
 
-}
+	            //se o estado do botão em questão for diferente do que foi servido, anima e troca...
+
+	            if (status_atual!=statusPin) {
+
+		        var comando, verbo, classe_retirar, classe_adicionar;
+
+	            if (statusPin=="1") {
+		            comando="OFF";
+		            verbo= "ON";
+		            classe_adicionar= "ligado";
+		            classe_retirar= "desligado";
+		    }
+	            else {
+		            comando="ON";
+		            verbo= "OFF";
+		            classe_adicionar= "desligado";
+		            classe_retirar= "ligado";
+		    }
+
+		        $("#botao_"+digitalPin).attr("data-comando", comando);
+		        $("#botao_"+digitalPin).attr("data-status", statusPin);
+
+		        //if (tipoPin!="2") {
+			        $("#botao_"+digitalPin).html(namePin);
+
+			        $("#botao_"+digitalPin).removeClass(classe_retirar);
+		        //}
+
+		        $("#botao_"+digitalPin).addClass(classe_adicionar);
+
+		        $("#botao_"+digitalPin).css("background-image", "url(images/"+digitalPin+"_"+verbo+".jpg)");
+	        }
+        });
+
+
+      },
+      error: function() {
+		alert("The XML File could not be processed correctly. E agora?");
+	  }
+
+	});
+
+ }
 
 
 
 
 
 // FUNCAO   Q U A T R O   -     M A G I C A
-$(document).ready(function() {
-
-  setupComponentsOnUI();
-
-  setInterval(function() {
-    checaEstado();
-  }, 15000);
+ $(document).ready(function() {
 
 
-  $(document).on('click', '.botao', function() {
-
-    var pino=              $(this).attr("data-pino");
-    var nome=              $(this).attr("data-nome");
-    var comando=           $(this).attr("data-comando");
-    var requerConfirmacao= $(this).attr("data-requerconfirmacao");
-    var passa= 0;
+	monta();
 
 
-    if ((requerConfirmacao=="1") && (comando=="ON")) {
-
-      passa= confirm("Tem realmente certeza absoluta que realmente fazer isto?");
-    }
-    else {
-
-      passa=1;
-    }
+	setInterval(function() {
+  	    checaEstado();
+        }, 15000);
 
 
-    if (passa) {
+        $(document).on('click', '.botao', function() {
 
-      envia(pino, comando);
-    }
+		 var pino=              $(this).attr("data-pino");
+		 var nome=              $(this).attr("data-nome");
+		 var comando=           $(this).attr("data-comando");
+		 var requerConfirmacao= $(this).attr("data-requerconfirmacao");
+		 var passa= 0;
 
-  });
+
+		 if ((requerConfirmacao=="1") && (comando=="ON")) {
+
+		       passa= confirm("Tem realmente certeza absoluta que realmente fazer isto?");
+		 }
+		 else {
+
+	              passa=1;
+		 }
+
+
+		 if (passa) {
+
+		     envia(pino, comando);
+		 }
+
+    });
 
 });
