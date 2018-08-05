@@ -80,30 +80,18 @@ function sendToArduino(pin, value) {
       $("#div_botao_" + pin + " .img_loading").hide();
 
       $(xml).find('Pin').each(function(index){
-        const digitalPin = $(this).find('digitalPin').text();
+
         const statusPin = $(this).find('Estado').text();
-        const pulse = $(this).find('pulso').text();
-
-        let namePin = $(this).find('namePin').text();
-        if (namePin == '') namePin = digitalPin;
-
         const currentStatus= $("#botao_" + digitalPin).attr("data-status");
-        // If the pin value we received is different from our current UI, we need to update the UI
-        if (currentStatus != statusPin) {
-          const command = (statusPin == '1') ? 'OFF' : 'ON';
-          const verb = (statusPin == '1') ? 'ON' : 'OFF';
-          const addClass = (statusPin == '1') ? 'ligado' : 'desligado';
-          const removeClass = (statusPin == '1') ? 'desligado' : 'ligado';
 
-          $("#botao_"+digitalPin).attr("data-comando", command);
-          $("#botao_"+digitalPin).attr("data-status", statusPin);
-          $("#botao_"+digitalPin).html(namePin);
-          $("#botao_"+digitalPin).removeClass(removeClass);
-          $("#botao_"+digitalPin).addClass(addClass);
-          $("#botao_"+digitalPin).css("background-image", "url(images/" + digitalPin + "_" + verb + ".jpg)");
-        }
-        // If it's the same (it means other app has updated it), then UI doesn't need to be changed
-        else {
+        if (currentStatus != statusPin) {
+          // If the pin value we received is different from our current UI, we need to update the UI
+          updateUI.call(this)
+        } else {
+          // If it's the same (it means other app has updated it), then UI doesn't need to be changed
+          const digitalPin = $(this).find('digitalPin').text();
+          const pulse = $(this).find('pulso').text();
+
           if ((pulse == '1') && (digitalPin == pin)) {
             $("#botao_" + digitalPin).attr("class", "ligado");
             setTimeout(function() {
@@ -114,6 +102,27 @@ function sendToArduino(pin, value) {
       });
     }
   });
+}
+
+function updateUI() {
+  const digitalPin = $(this).find('digitalPin').text();
+  const statusPin = $(this).find('Estado').text();
+  const pulse = $(this).find('pulso').text();
+
+  let namePin = $(this).find('namePin').text();
+  if (namePin == '') namePin = digitalPin;
+
+  const command = (statusPin == '1') ? 'OFF' : 'ON';
+  const verb = (statusPin == '1') ? 'ON' : 'OFF';
+  const addClass = (statusPin == '1') ? 'ligado' : 'desligado';
+  const removeClass = (statusPin == '1') ? 'desligado' : 'ligado';
+
+  $("#botao_"+digitalPin).attr("data-comando", command);
+  $("#botao_"+digitalPin).attr("data-status", statusPin);
+  $("#botao_"+digitalPin).html(namePin);
+  $("#botao_"+digitalPin).removeClass(removeClass);
+  $("#botao_"+digitalPin).addClass(addClass);
+  $("#botao_"+digitalPin).css("background-image", "url(images/" + digitalPin + "_" + verb + ".jpg)");
 }
 
 // FUNCTION 3: Receives a new XML from Arduino and updates the UI if needed
@@ -128,33 +137,13 @@ function checkArduinoState() {
     dataType: "xml",
 
     success: function(xml) {
-
-      //TODO: Remove all duplicated code between Funtions 2 and 3
       $("#div_botao_" + pin + " .img_loading").hide();
 
       $(xml).find('Pin').each(function(index){
-        const digitalPin = $(this).find('digitalPin').text();
         const statusPin = $(this).find('Estado').text();
-        const pulse = $(this).find('pulso').text();
-
-        let namePin = $(this).find('namePin').text();
-        if (namePin == '') namePin = digitalPin;
-
         const currentStatus= $("#botao_" + digitalPin).attr("data-status");
-        // If the pin value we received is different from our current UI, we need to update the UI
-        if (currentStatus != statusPin) {
-          const command = (statusPin == '1') ? 'OFF' : 'ON';
-          const verb = (statusPin == '1') ? 'ON' : 'OFF';
-          const addClass = (statusPin == '1') ? 'ligado' : 'desligado';
-          const removeClass = (statusPin == '1') ? 'desligado' : 'ligado';
 
-          $("#botao_"+digitalPin).attr("data-comando", command);
-          $("#botao_"+digitalPin).attr("data-status", statusPin);
-          $("#botao_"+digitalPin).html(namePin);
-          $("#botao_"+digitalPin).removeClass(removeClass);
-          $("#botao_"+digitalPin).addClass(addClass);
-          $("#botao_"+digitalPin).css("background-image", "url(images/" + digitalPin + "_" + verb + ".jpg)");
-        }
+        if (currentStatus != statusPin) updateUI.call(this)
       });
     },
     error: function() {
