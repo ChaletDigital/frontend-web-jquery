@@ -1,283 +1,190 @@
-//Configure aqui o endereço e a porta do Arduino
-//var url_global= "http://geninho.homeip.net:88";
-var url_global= "http://192.168.25.36:82";
 
 $.support.cors = true;
 
+const url_global= "http://geninhofloripa.ddns.net:82";
+const REFRESH_TIME_MS = 15000;
 
-// FUNCAO  U M  - MONTA
-function monta() {
+const replies = {
+    'XML_ISSUE' :'The XML file could not be processed correctly.',
+    'CONFIRMATION' :'Are you sure you sure you really want to do that?',
+};
 
-	 $.ajax({
-		  type: "GET",
+// FUNCTION ONE: Receive the XML from Arduino and builds UI based on the XML
+function setupComponentsOnUI() {
 
-		  crossDomain: true,
+  $.ajax({
+    type: "GET",
+    crossDomain: true,
+    url: url_global,
+    async : true,
+    contentType: "text/xml",
+    dataType: "xml",
 
-		  url: url_global,
+    success: function(xml) {
+      $("#loading").remove();
+      $(xml).find('Pin').each(function(index){
 
-		  async : true,
+        const digitalPin = $(this).find('digitalPin').text();
+        const statusPin = $(this).find('Estado').text();
+        const requerConfirmacao = $(this).find('requerConfirmacao').text();
+        const dimerizavel = $(this).find('dimerizavel').text();
+        const pulso = $(this).find('pulso').text();
 
-		  contentType: "text/xml",
+        let namePin = $(this).find('namePin').text();
+        if (namePin == '') namePin = digitalPin;
 
-		  dataType: "xml",
+        const comando = (statusPin == '1') ? 'OFF' : 'ON';
+        const verbo = (statusPin == '1') ? 'ON' : 'OFF';
+        const classe_botao = (statusPin == '1') ? 'ligado' : 'desligado';
+        const larguraBotao = (dimerizavel == '1') ? 3 : 6;
 
-		  success: function(xml) {
-
-	              $("#loading").remove();
-
-		      $(xml).find('Pin').each(function(index){
-
-		            var digitalPin = $(this).find('digitalPin').text();
-		            var statusPin = $(this).find('Estado').text();
-		            var namePin = $(this).find('namePin').text();
-		            var requerConfirmacao = $(this).find('requerConfirmacao').text();
-		            var dimerizavel = $(this).find('dimerizavel').text();
-		            var pulso = $(this).find('pulso').text();
-
-		            if (namePin=="") namePin= digitalPin;
-
-
-		            var comando, verbo, classe_botao;
-		            if (statusPin=="1") {
-
-			            comando="OFF";
-			            verbo= "ON";
-			            classe_botao= "ligado";
-			    }
-		            else {
-
-			            comando="ON";
-			            verbo= "OFF";
-			            classe_botao= "desligado";
-			    }
-
-		            var larguraBotao;
-		            if (dimerizavel=="1") larguraBotao=3;
-		            else larguraBotao=6;
-
-
-		            $('.row').append('<div class="bloco\
-		                                  col-lg-' +larguraBotao+' col-sm-' +larguraBotao+' \
-					          col-md-' +larguraBotao+' col-xs-' +larguraBotao+'" \
-					          id="div_botao_' +digitalPin+' ">\
-			       	                <button style="background-image:url(images/' +digitalPin+ '_'+verbo+'.jpg);"\
-					           id="botao_'+digitalPin+'" class="btn btn-large btn-primary botao '+classe_botao+'" \
-					           data-status="' +statusPin+ '" data-nome="' +namePin+' " \
-					           data-requerconfirmacao="' +requerConfirmacao+ '" \
-					           data-dimerizavel="' +dimerizavel+ '" \
-					           data-pulso="' +pulso+ '" \
-					           data-comando="' +comando+ '" \
-					           data-pino="' +digitalPin+ '">' +namePin+ '\
-					        </button>\
-					      </div>');
-
-	              });
-
-
-		  },
-
-		  error: function() {
-
-		     alert("The XML File could not be processed correctly.");
-
-	          }
-
-
-     });
-
+        $('.row').append(
+          '<div class="bloco\
+            col-lg-' +larguraBotao+' col-sm-' +larguraBotao+' \
+            col-md-' +larguraBotao+' col-xs-' +larguraBotao+'" \
+            id="div_botao_' +digitalPin+' ">\
+            <button style="background-image:url(images/' +digitalPin+ '_'+verbo+'.jpg);"\
+              id="botao_'+digitalPin+'" class="btn btn-large btn-primary botao '+classe_botao+'" \
+              data-status="' +statusPin+ '" data-nome="' +namePin+' " \
+              data-requerconfirmacao="' +requerConfirmacao+ '" \
+              data-dimerizavel="' +dimerizavel+ '" \
+              data-pulso="' +pulso+ '" \
+              data-comando="' +comando+ '" \
+              data-pino="' +digitalPin+ '">' +namePin+ '\
+            </button>\
+          </div>');
+      });
+    },
+    error: function() {
+      alert(message['XML_ISSUE']);
+    }
+  });
 }
 
 
+// FUNCTION TWO: Send a GET request to Arduino with a new value for a pin and updates UI
+function sendToArduino(pin, value) {
 
+  $("#div_botao_" + pin + " .img_loading").css("display", "block");
 
+  $.ajax({
+    type: "GET",
+    crossDomain: true,
+    async : true,
+    contentType: "text/xml",
+    dataType: "xml",
+    url: url_global,
 
-// FUNCAO  D O I S  -
-function envia(pino, valor) {
-    //console.log(pino+ " - " +valor);
+    //Value to be sent to Arduino on the GET request, according to parameters given
+    data: 'PIN' + pin + '=' + value,
 
-    $("#div_botao_"+pino+" .img_loading").css("display", "block");
+    success: function(xml) {
+      $("#div_botao_" + pin + " .img_loading").hide();
 
-    $.ajax({
-        type: "GET",
-	crossDomain: true,
-	async : true,
-	contentType: "text/xml",
-	dataType: "xml",
-	url: url_global,
+      $(xml).find('Pin').each(function(index){
+        const digitalPin = $(this).find('digitalPin').text();
+        const statusPin = $(this).find('Estado').text();
+        const pulse = $(this).find('pulso').text();
 
-	// valor a ser enviado ao Arduino para ligar ou desligar algo, de acordo com os parâmetros
-	data: 'PIN'+pino+'='+valor,
+        let namePin = $(this).find('namePin').text();
+        if (namePin == '') namePin = digitalPin;
 
-	success: function(xml) {
-            $("#div_botao_"+pino+" .img_loading").hide();
+        const currentStatus= $("#botao_" + digitalPin).attr("data-status");
+        // If the pin value we received is different from our current UI, we need to update the UI
+        if (currentStatus != statusPin) {
+          const command = (statusPin == '1') ? 'OFF' : 'ON';
+          const verb = (statusPin == '1') ? 'ON' : 'OFF';
+          const shouldAddClass = (statusPin == '1') ? 'ligado' : 'desligado';
+          const shouldRemoveClass = (statusPin == '1') ? 'desligado' : 'ligado';
 
-            $(xml).find('Pin').each(function(index){
-	        var digitalPin =          $(this).find('digitalPin').text();
-	        var statusPin =           $(this).find('Estado').text();
-	        var namePin =             $(this).find('namePin').text();
-	        var pulso =               $(this).find('pulso').text();
-
-	        if (namePin=="") namePin= digitalPin;
-
-	        var status_atual= $("#botao_"+digitalPin).attr("data-status");
-
-		// se o estado do botão em questão for diferente do que foi servido, anima e troca...
-		if (status_atual!=statusPin) {
-                    var comando, verbo, classe_retirar, classe_adicionar;
-
-		    if (statusPin=="1") {
-                        comando="OFF";
-			verbo= "ON";
-			classe_adicionar= "ligado";
-			classe_retirar= "desligado";
-                    }
-		    else {
-	                comando="ON";
-	                verbo= "OFF";
-	                classe_adicionar= "desligado";
-	                classe_retirar= "ligado";
-                    }
-		    $("#botao_"+digitalPin).attr("data-comando", comando);
-		    $("#botao_"+digitalPin).attr("data-status", statusPin);
-		    $("#botao_"+digitalPin).html(namePin);
-		    $("#botao_"+digitalPin).removeClass(classe_retirar);
-		    $("#botao_"+digitalPin).addClass(classe_adicionar);
-		    $("#botao_"+digitalPin).css("background-image", "url(images/"+digitalPin+"_"+verbo+".jpg)");
-
-
-		}
-		//se for igual quer dizer que outro app ligou ou desligou, então não precisa fazer nada
-		else {
-		    if ((pulso=="1") && (digitalPin==pino)) {
-		        $("#botao_"+digitalPin).attr("class", "ligado");
-
-                        setTimeout(function() {
-                            $("#botao_"+digitalPin).attr("class", "desligado");
-          	        }, 250);
-
-		    }
-
-                }
-
-            });
+          $("#botao_"+digitalPin).attr("data-comando", command);
+          $("#botao_"+digitalPin).attr("data-status", statusPin);
+          $("#botao_"+digitalPin).html(namePin);
+          $("#botao_"+digitalPin).removeClass(shouldRemoveClass);
+          $("#botao_"+digitalPin).addClass(shouldAddClass);
+          $("#botao_"+digitalPin).css("background-image", "url(images/" + digitalPin + "_" + verb + ".jpg)");
         }
-
-    });
+        // If it's the same (it means other app has updated it), then UI doesn't need to be changed
+        else {
+          if ((pulse == '1') && (digitalPin == pin)) {
+            $("#botao_" + digitalPin).attr("class", "ligado");
+            setTimeout(function() {
+              $("#botao_" + digitalPin).attr("class", "desligado");
+            }, 250);
+          }
+        }
+      });
+    }
+  });
 }
 
+// FUNCTION 3: Receives a new XML from Arduino and updates the UI if needed
+function checkArduinoState() {
 
+  $.ajax({
+    type: "GET",
+    crossDomain: true,
+    url: url_global,
+    async : true,
+    contentType: "text/xml",
+    dataType: "xml",
 
+    success: function(xml) {
 
+      //TODO: Remove all duplicated code between Funtions 2 and 3
+      $("#div_botao_" + pin + " .img_loading").hide();
 
-// FUNCAO  T R E S -   CHECA ESTADO
- function checaEstado() {
+      $(xml).find('Pin').each(function(index){
+        const digitalPin = $(this).find('digitalPin').text();
+        const statusPin = $(this).find('Estado').text();
+        const pulse = $(this).find('pulso').text();
 
-	 $.ajax({
-	  type: "GET",
-	  crossDomain: true,
-	  url: url_global,
-	  async : true,
-	  contentType: "text/xml",
-	  dataType: "xml",
+        let namePin = $(this).find('namePin').text();
+        if (namePin == '') namePin = digitalPin;
 
-	  success: function(xml) {
+        const currentStatus= $("#botao_" + digitalPin).attr("data-status");
+        // If the pin value we received is different from our current UI, we need to update the UI
+        if (currentStatus != statusPin) {
+          const command = (statusPin == '1') ? 'OFF' : 'ON';
+          const verb = (statusPin == '1') ? 'ON' : 'OFF';
+          const shouldAddClass = (statusPin == '1') ? 'ligado' : 'desligado';
+          const shouldRemoveClass = (statusPin == '1') ? 'desligado' : 'ligado';
 
-	        $(xml).find('Pin').each(function(index){
+          $("#botao_"+digitalPin).attr("data-comando", command);
+          $("#botao_"+digitalPin).attr("data-status", statusPin);
+          $("#botao_"+digitalPin).html(namePin);
+          $("#botao_"+digitalPin).removeClass(shouldRemoveClass);
+          $("#botao_"+digitalPin).addClass(shouldAddClass);
+          $("#botao_"+digitalPin).css("background-image", "url(images/" + digitalPin + "_" + verb + ".jpg)");
+        }
+      });
+    },
+    error: function() {
+      alert(message['XML_ISSUE']);
+    }
+  });
+}
 
-                    var digitalPin = $(this).find('digitalPin').text();
-                    var statusPin = $(this).find('Estado').text();
-                    var namePin = $(this).find('namePin').text();
-                    //var tipoPin= $(this).find('Tipo').text();
+// FUNCION 4: Main
+$(document).ready(function() {
 
+  setupComponentsOnUI();
 
-                    if (namePin=="") namePin= digitalPin;
+  setInterval(function() {
+    checkArduinoState();
+  }, REFRESH_TIME_MS);
 
-                    var status_atual= $("#botao_"+digitalPin).attr("data-status");
+  $(document).on('click', '.botao', function() {
 
-	            //se o estado do botão em questão for diferente do que foi servido, anima e troca...
+    const pin = $(this).attr("data-pino");
+    const name = $(this).attr("data-nome");
 
-	            if (status_atual!=statusPin) {
+    const command = $(this).attr("data-comando");
+    const requiresConfirmation = $(this).attr("data-requerconfirmacao");
+    const needsUserConfirmation = (requiresConfirmation == '1') && (command == 'ON')
 
-		        var comando, verbo, classe_retirar, classe_adicionar;
-
-	            if (statusPin=="1") {
-		            comando="OFF";
-		            verbo= "ON";
-		            classe_adicionar= "ligado";
-		            classe_retirar= "desligado";
-		    }
-	            else {
-		            comando="ON";
-		            verbo= "OFF";
-		            classe_adicionar= "desligado";
-		            classe_retirar= "ligado";
-		    }
-
-		        $("#botao_"+digitalPin).attr("data-comando", comando);
-		        $("#botao_"+digitalPin).attr("data-status", statusPin);
-
-		        //if (tipoPin!="2") {
-			        $("#botao_"+digitalPin).html(namePin);
-
-			        $("#botao_"+digitalPin).removeClass(classe_retirar);
-		        //}
-
-		        $("#botao_"+digitalPin).addClass(classe_adicionar);
-
-		        $("#botao_"+digitalPin).css("background-image", "url(images/"+digitalPin+"_"+verbo+".jpg)");
-	        }
-        });
-
-
-      },
-      error: function() {
-		alert("The XML File could not be processed correctly. E agora?");
-	  }
-
-	});
-
- }
-
-
-
-
-
-// FUNCAO   Q U A T R O   -     M A G I C A
- $(document).ready(function() {
-
-
-	monta();
-
-
-	setInterval(function() {
-  	    checaEstado();
-        }, 15000);
-
-
-        $(document).on('click', '.botao', function() {
-
-		 var pino=              $(this).attr("data-pino");
-		 var nome=              $(this).attr("data-nome");
-		 var comando=           $(this).attr("data-comando");
-		 var requerConfirmacao= $(this).attr("data-requerconfirmacao");
-		 var passa= 0;
-
-
-		 if ((requerConfirmacao=="1") && (comando=="ON")) {
-
-		       passa= confirm("Tem realmente certeza absoluta que realmente fazer isto?");
-		 }
-		 else {
-
-	              passa=1;
-		 }
-
-
-		 if (passa) {
-
-		     envia(pino, comando);
-		 }
-
-    });
-
+    let commandIsAuthorized = true;
+    if (needsUserConfirmation) commandIsAuthorized = confirm(message['CONFIRMATION']);
+    if (commandIsAuthorized) sendToArduino(pin, command);
+  });
 });
