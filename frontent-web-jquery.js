@@ -1,6 +1,8 @@
-//Setup address and port of Arduino
-var url_global= "http://geninhofloripa.ddns.net:82";
+
 $.support.cors = true;
+
+const url_global= "http://geninhofloripa.ddns.net:82";
+const REFRESH_TIME_MS = 15000;
 
 const replies = {
     'XML_ISSUE' :'The XML file could not be processed correctly.',
@@ -170,7 +172,7 @@ $(document).ready(function() {
 
   setInterval(function() {
     checkArduinoState();
-  }, 3000);
+  }, REFRESH_TIME_MS);
 
   $(document).on('click', '.botao', function() {
 
