@@ -1,8 +1,13 @@
-//Configure aqui o endereço e a porta do Arduino
-//var url_global= "http://geninho.homeip.net:88";
-var url_global= "http://geninhofloripa.ddns.net:82";
 
 $.support.cors = true;
+
+const url_global= "http://geninhofloripa.ddns.net:82";
+const REFRESH_TIME_MS = 15000;
+
+const replies = {
+    'XML_ISSUE' :'The XML file could not be processed correctly.',
+    'CONFIRMATION' :'Are you sure you sure you really want to do that?',
+};
 
 // FUNCTION ONE: Receive the XML from Arduino and builds UI based on the XML
 function setupComponentsOnUI() {
@@ -31,7 +36,7 @@ function setupComponentsOnUI() {
         const comando = (statusPin == '1') ? 'OFF' : 'ON';
         const verbo = (statusPin == '1') ? 'ON' : 'OFF';
         const classe_botao = (statusPin == '1') ? 'ligado' : 'desligado';
-        const larguraBotao = (dimerizavel == '1') ? 3 ? 6;
+        const larguraBotao = (dimerizavel == '1') ? 3 : 6;
 
         $('.row').append(
           '<div class="bloco\
@@ -51,7 +56,7 @@ function setupComponentsOnUI() {
       });
     },
     error: function() {
-      alert("The XML file could not be processed correctly.");
+      alert(message['XML_ISSUE']);
     }
   });
 }
@@ -89,14 +94,14 @@ function sendToArduino(pin, value) {
         if (currentStatus != statusPin) {
           const command = (statusPin == '1') ? 'OFF' : 'ON';
           const verb = (statusPin == '1') ? 'ON' : 'OFF';
-          const addClass = (statusPin == '1') ? 'ligado' : 'desligado';
-          const removeClass = (statusPin == '1') ? 'desligado' : 'ligado';
+          const shouldAddClass = (statusPin == '1') ? 'ligado' : 'desligado';
+          const shouldRemoveClass = (statusPin == '1') ? 'desligado' : 'ligado';
 
           $("#botao_"+digitalPin).attr("data-comando", command);
           $("#botao_"+digitalPin).attr("data-status", statusPin);
           $("#botao_"+digitalPin).html(namePin);
-          $("#botao_"+digitalPin).removeClass(removeClass);
-          $("#botao_"+digitalPin).addClass(addClass);
+          $("#botao_"+digitalPin).removeClass(shouldRemoveClass);
+          $("#botao_"+digitalPin).addClass(shouldAddClass);
           $("#botao_"+digitalPin).css("background-image", "url(images/" + digitalPin + "_" + verb + ".jpg)");
         }
         // If it's the same (it means other app has updated it), then UI doesn't need to be changed
@@ -155,50 +160,31 @@ function checkArduinoState() {
       });
     },
     error: function() {
-      alert("The XML file could not be processed correctly.");
+      alert(message['XML_ISSUE']);
     }
   });
 }
 
-
-
-
-
-
-// FUNCAO   Q U A T R O   -     M A G I C A
+// FUNCION 4: Main
 $(document).ready(function() {
 
   setupComponentsOnUI();
 
   setInterval(function() {
     checkArduinoState();
-  }, 3000);
-
+  }, REFRESH_TIME_MS);
 
   $(document).on('click', '.botao', function() {
 
-    var pino=              $(this).attr("data-pino");
-    var nome=              $(this).attr("data-nome");
-    var comando=           $(this).attr("data-comando");
-    var requerConfirmacao= $(this).attr("data-requerconfirmacao");
-    var passa= 0;
+    const pin = $(this).attr("data-pino");
+    const name = $(this).attr("data-nome");
 
+    const command = $(this).attr("data-comando");
+    const requiresConfirmation = $(this).attr("data-requerconfirmacao");
+    const needsUserConfirmation = (requiresConfirmation == '1') && (command == 'ON')
 
-    if ((requerConfirmacao=="1") && (comando=="ON")) {
-
-      passa= confirm("Tem realmente certeza absoluta que realmente fazer isto?");
-    }
-    else {
-
-      passa=1;
-    }
-
-
-    if (passa) {
-
-      sendToArduino(pino, comando);
-    }
-
+    let commandIsAuthorized = true;
+    if (needsUserConfirmation) commandIsAuthorized = confirm(message['CONFIRMATION']);
+    if (commandIsAuthorized) sendToArduino(pin, command);
   });
-
 });
