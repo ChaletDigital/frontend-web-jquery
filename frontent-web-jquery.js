@@ -147,14 +147,14 @@ function checkArduinoState() {
         if (currentStatus != statusPin) {
           const command = (statusPin == '1') ? 'OFF' : 'ON';
           const verb = (statusPin == '1') ? 'ON' : 'OFF';
-          const addClass = (statusPin == '1') ? 'ligado' : 'desligado';
-          const removeClass = (statusPin == '1') ? 'desligado' : 'ligado';
+          const shouldAddClass = (statusPin == '1') ? 'ligado' : 'desligado';
+          const shouldRemoveClass = (statusPin == '1') ? 'desligado' : 'ligado';
 
           $("#botao_"+digitalPin).attr("data-comando", command);
           $("#botao_"+digitalPin).attr("data-status", statusPin);
           $("#botao_"+digitalPin).html(namePin);
-          $("#botao_"+digitalPin).removeClass(removeClass);
-          $("#botao_"+digitalPin).addClass(addClass);
+          $("#botao_"+digitalPin).removeClass(shouldRemoveClass);
+          $("#botao_"+digitalPin).addClass(shouldAddClass);
           $("#botao_"+digitalPin).css("background-image", "url(images/" + digitalPin + "_" + verb + ".jpg)");
         }
       });
