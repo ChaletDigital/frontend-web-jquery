@@ -4,7 +4,7 @@ $.support.cors = true;
 
 const replies = {
     'XML_ISSUE' :'The XML file could not be processed correctly.',
-    'CONFIRMATION' :'Tem realmente certeza absoluta que deseja fazer isto?',
+    'CONFIRMATION' :'Are you sure you sure you really want to do that?',
 };
 
 // FUNCTION ONE: Receive the XML from Arduino and builds UI based on the XML
@@ -92,14 +92,14 @@ function sendToArduino(pin, value) {
         if (currentStatus != statusPin) {
           const command = (statusPin == '1') ? 'OFF' : 'ON';
           const verb = (statusPin == '1') ? 'ON' : 'OFF';
-          const addClass = (statusPin == '1') ? 'ligado' : 'desligado';
-          const removeClass = (statusPin == '1') ? 'desligado' : 'ligado';
+          const shouldAddClass = (statusPin == '1') ? 'ligado' : 'desligado';
+          const shouldRemoveClass = (statusPin == '1') ? 'desligado' : 'ligado';
 
           $("#botao_"+digitalPin).attr("data-comando", command);
           $("#botao_"+digitalPin).attr("data-status", statusPin);
           $("#botao_"+digitalPin).html(namePin);
-          $("#botao_"+digitalPin).removeClass(removeClass);
-          $("#botao_"+digitalPin).addClass(addClass);
+          $("#botao_"+digitalPin).removeClass(shouldRemoveClass);
+          $("#botao_"+digitalPin).addClass(shouldAddClass);
           $("#botao_"+digitalPin).css("background-image", "url(images/" + digitalPin + "_" + verb + ".jpg)");
         }
         // If it's the same (it means other app has updated it), then UI doesn't need to be changed
