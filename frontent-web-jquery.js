@@ -31,7 +31,7 @@ function setupComponentsOnUI() {
         const comando = (statusPin == '1') ? 'OFF' : 'ON';
         const verbo = (statusPin == '1') ? 'ON' : 'OFF';
         const classe_botao = (statusPin == '1') ? 'ligado' : 'desligado';
-        const larguraBotao = (dimerizavel == '1') ? 3 ? 6;
+        const larguraBotao = (dimerizavel == '1') ? 3 : 6;
 
         $('.row').append(
           '<div class="bloco\
