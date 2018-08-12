@@ -2,7 +2,7 @@
 $.support.cors = true;
 
 const url_global= "http://geninhofloripa.ddns.net:82";
-const REFRESH_TIME_MS = 15000;
+const REFRESH_TIME_MS = 10000;
 
 const replies = {
     'XML_ISSUE' :'The XML file could not be processed correctly.',
