@@ -2,7 +2,7 @@
 $.support.cors = true;
 
 const url_global= "http://geninhofloripa.ddns.net:82";
-const REFRESH_TIME_MS = 15000;
+const REFRESH_TIME_MS = 10000;
 
 const replies = {
     'XML_ISSUE' :'The XML file could not be processed correctly.',
@@ -43,8 +43,8 @@ function setupComponentsOnUI() {
             col-lg-' +larguraBotao+' col-sm-' +larguraBotao+' \
             col-md-' +larguraBotao+' col-xs-' +larguraBotao+'" \
             id="div_botao_' +digitalPin+' ">\
-            <button style="background-image:url(images/' +digitalPin+ '_'+verbo+'.jpg);"\
-              id="botao_'+digitalPin+'" class="btn btn-large btn-primary botao '+classe_botao+'" \
+            <button \
+              id="botao_'+digitalPin+'" class="btn btn-large botao '+classe_botao+'" \
               data-status="' +statusPin+ '" data-nome="' +namePin+' " \
               data-requerconfirmacao="' +requerConfirmacao+ '" \
               data-dimerizavel="' +dimerizavel+ '" \
@@ -102,7 +102,6 @@ function sendToArduino(pin, value) {
           $("#botao_"+digitalPin).html(namePin);
           $("#botao_"+digitalPin).removeClass(shouldRemoveClass);
           $("#botao_"+digitalPin).addClass(shouldAddClass);
-          $("#botao_"+digitalPin).css("background-image", "url(images/" + digitalPin + "_" + verb + ".jpg)");
         }
         // If it's the same (it means other app has updated it), then UI doesn't need to be changed
         else {
@@ -132,8 +131,6 @@ function checkArduinoState() {
     success: function(xml) {
 
       //TODO: Remove all duplicated code between Funtions 2 and 3
-      $("#div_botao_" + pin + " .img_loading").hide();
-
       $(xml).find('Pin').each(function(index){
         const digitalPin = $(this).find('digitalPin').text();
         const statusPin = $(this).find('Estado').text();
@@ -155,7 +152,6 @@ function checkArduinoState() {
           $("#botao_"+digitalPin).html(namePin);
           $("#botao_"+digitalPin).removeClass(shouldRemoveClass);
           $("#botao_"+digitalPin).addClass(shouldAddClass);
-          $("#botao_"+digitalPin).css("background-image", "url(images/" + digitalPin + "_" + verb + ".jpg)");
         }
       });
     },
