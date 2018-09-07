@@ -180,7 +180,7 @@ $(document).ready(function() {
     const needsUserConfirmation = (requiresConfirmation == '1') && (command == 'ON')
 
     var commandIsAuthorized = true;
-    if (needsUserConfirmation) commandIsAuthorized = confirm(message['CONFIRMATION']);
+    if (needsUserConfirmation) commandIsAuthorized = confirm(replies['CONFIRMATION']);
     if (commandIsAuthorized) sendToArduino(pin, command);
   });
 });
