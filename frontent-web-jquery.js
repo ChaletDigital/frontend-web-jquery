@@ -30,7 +30,7 @@ function setupComponentsOnUI() {
         const dimerizavel = $(this).find('dimerizavel').text();
         const pulso = $(this).find('pulso').text();
 
-        let namePin = $(this).find('namePin').text();
+        var namePin = $(this).find('namePin').text();
         if (namePin == '') namePin = digitalPin;
 
         const comando = (statusPin == '1') ? 'OFF' : 'ON';
@@ -86,7 +86,7 @@ function sendToArduino(pin, value) {
         const statusPin = $(this).find('Estado').text();
         const pulse = $(this).find('pulso').text();
 
-        let namePin = $(this).find('namePin').text();
+        var namePin = $(this).find('namePin').text();
         if (namePin == '') namePin = digitalPin;
 
         const currentStatus= $("#botao_" + digitalPin).attr("data-status");
@@ -136,7 +136,7 @@ function checkArduinoState() {
         const statusPin = $(this).find('Estado').text();
         const pulse = $(this).find('pulso').text();
 
-        let namePin = $(this).find('namePin').text();
+        var namePin = $(this).find('namePin').text();
         if (namePin == '') namePin = digitalPin;
 
         const currentStatus= $("#botao_" + digitalPin).attr("data-status");
@@ -179,7 +179,7 @@ $(document).ready(function() {
     const requiresConfirmation = $(this).attr("data-requerconfirmacao");
     const needsUserConfirmation = (requiresConfirmation == '1') && (command == 'ON')
 
-    let commandIsAuthorized = true;
+    var commandIsAuthorized = true;
     if (needsUserConfirmation) commandIsAuthorized = confirm(message['CONFIRMATION']);
     if (commandIsAuthorized) sendToArduino(pin, command);
   });
