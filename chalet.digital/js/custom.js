@@ -56,7 +56,7 @@ function setupComponentsOnUI() {
       });
     },
     error: function() {
-      alert(message['XML_ISSUE']);
+      alert(replies['XML_ISSUE']);
     }
   });
 }
@@ -156,7 +156,7 @@ function checkArduinoState() {
       });
     },
     error: function() {
-      alert(message['XML_ISSUE']);
+      alert(replies['XML_ISSUE']);
     }
   });
 }
