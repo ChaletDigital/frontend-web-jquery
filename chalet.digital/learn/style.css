@@ -1,0 +1,57 @@
+
+body {
+	display: table;
+	vertical-align: middle;
+	height: 100%;
+	width: 100%;
+}	
+
+body .row {
+	display: table-cell;
+	vertical-align: middle;
+	width: 100%;
+}
+.bloco {
+	height: 130px;
+	padding:0 !important;
+}
+.bloco button {
+	width: 100%;
+	height: 100%;
+	border-radius: 0;
+	display: block;
+	font: normal 30px/30px "Trebuchet MS";
+	background-size: cover;
+	border: none;
+}
+
+/* # = ao que tem no id="" */
+#master {
+	
+}
+
+/* . = ao que tem na class="" */
+.row {
+	
+}
+
+button {
+	background-repeat: no-repeat;
+	background-position: center center;
+}
+
+button:hover {
+	
+}
+
+.ligado, .ligado:hover {
+	background-color: #D9D900;
+	color: #000;
+	text-shadow: 1px 1px 1px #fff;
+}
+.desligado, .desligado:hover {
+	background-color: #000;
+	color: #fff;
+	text-shadow: 1px 1px 1px #000;
+}
+
